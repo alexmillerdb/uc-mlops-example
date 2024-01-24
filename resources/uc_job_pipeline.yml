@@ -49,22 +49,22 @@ resources:
         - task_key: model-training
           job_cluster_key: uc_mlops_cluster
           notebook_task:
-            notebook_path: ../notebooks/mlflow-uc/model-training
+            notebook_path: notebooks/mlflow-uc/model-training
             base_parameters:
               model_name: ${var.model_name}
               run_name: ${var.run_name}
-              experiment_name: ${var.run_name}
+              experiment_name: ${var.experiment_name}
               git_source_info: url:${bundle.git.origin_url}; branch:${bundle.git.branch}; commit:${bundle.git.commit}
             source: GIT
         - task_key: validate-model
           depends_on:
             - task_key: model-training
           notebook_task:
-            notebook_path: ../notebooks/mlflow-uc/validate-model
+            notebook_path: notebooks/mlflow-uc/validate-model
             base_parameters:
               model_name: ${var.model_name}
               run_name: ${var.run_name}
-              experiment_name: ${var.run_name}
+              experiment_name: ${var.experiment_name}
               git_source_info: url:${bundle.git.origin_url}; branch:${bundle.git.branch}; commit:${bundle.git.commit}
             source: GIT
           job_cluster_key: uc_mlops_cluster
@@ -72,11 +72,11 @@ resources:
           depends_on:
             - task_key: validate-model
           notebook_task:
-            notebook_path: ../notebooks/mlflow-uc/update-model-alias
+            notebook_path: notebooks/mlflow-uc/update-model-alias
             base_parameters:
               model_name: ${var.model_name}
               run_name: ${var.run_name}
-              experiment_name: ${var.run_name}
+              experiment_name: ${var.experiment_name}
               git_source_info: url:${bundle.git.origin_url}; branch:${bundle.git.branch}; commit:${bundle.git.commit}
             source: GIT
           job_cluster_key: uc_mlops_cluster
@@ -84,13 +84,13 @@ resources:
           depends_on:
             - task_key: update-model-alias
           notebook_task:
-            notebook_path: ../notebooks/mlflow-uc/roll-model-back
+            notebook_path: notebooks/mlflow-uc/roll-model-back
             base_parameters:
               roll_back: ${var.roll_back}
               roll_back_version: ${var.roll_back_version}
               model_name: ${var.model_name}
               run_name: ${var.run_name}
-              experiment_name: ${var.run_name}
+              experiment_name: ${var.experiment_name}
               git_source_info: url:${bundle.git.origin_url}; branch:${bundle.git.branch}; commit:${bundle.git.commit}
             source: GIT
           job_cluster_key: uc_mlops_cluster
@@ -98,11 +98,11 @@ resources:
           depends_on:
             - task_key: roll-back-model
           notebook_task:
-            notebook_path: ../notebooks/mlflow-uc/deploy-model
+            notebook_path: notebooks/mlflow-uc/deploy-model
             base_parameters:
               model_name: ${var.model_name}
               run_name: ${var.run_name}
-              experiment_name: ${var.run_name}
+              experiment_name: ${var.experiment_name}
               config_file: ${var.config_file}
               git_source_info: url:${bundle.git.origin_url}; branch:${bundle.git.branch}; commit:${bundle.git.commit}
             source: GIT
@@ -111,11 +111,11 @@ resources:
         git_url: https://github.com/alexmillerdb/uc-mlops-example.git
         git_provider: gitHub
         git_branch: main
-      # parameters:
-      #   - name: roll_back
-      #     default: "False"
-      #   - name: roll_back_version
-      #     default: "4"
+      parameters:
+        - name: roll_back
+          default: ${var.roll_back}
+        - name: roll_back_version
+          default: ${var.roll_back_version}
       #   - name: model_name
       #     default: ${var.model_name}
       #   - name: run_name
