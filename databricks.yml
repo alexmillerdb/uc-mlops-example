@@ -1,0 +1,39 @@
+# yaml-language-server: $schema=bundle_config_schema.json
+bundle:
+  name: uc-mlops-example
+
+include:
+  - resources/*.yml
+
+# resources:
+#   pipelines:
+#     dlt-wikipedia-pipeline:
+#       name: dlt-wikipedia-pipeline
+#       development: true
+#       continuous: false
+#       channel: "CURRENT"
+#       photon: false
+#       libraries:
+#         - file:
+#             path: ./dlt-wikipedia-python.py
+#       edition: "ADVANCED"
+#       clusters:
+#         - label: "default"
+#           num_workers: 1
+
+targets:
+  dev:
+    default: true
+    workspace:
+      host: https://adb-984752964297111.11.azuredatabricks.net/
+
+  prod:
+    workspace:
+      host: https://adb-984752964297111.11.azuredatabricks.net/
+      root_path: /Shared/.bundle/prod/${bundle.name}
+    run_as:
+      user_name: alex.miller@databricks.com
+    # resources:
+    #   pipelines:
+    #     dlt-wikipedia-pipeline:
+    #       continuous: true

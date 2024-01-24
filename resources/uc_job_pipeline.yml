@@ -1,0 +1,125 @@
+##  yaml-language-server: $schema=../bundle_config_schema.json
+
+new_cluster: &new_cluster
+  new_cluster:
+    autoscale:
+      min_workers: 2
+      max_workers: 8
+    spark_version: 14.2.x-cpu-ml-scala2.12
+    node_type_id: Standard_DS3_v2
+    data_security_mode: SINGLE_USER
+    custom_tags:
+      clusterSource: uc-mlops-example
+
+permissions: &permissions
+  permissions:
+    - level: CAN_VIEW
+      group_name: users
+
+variables:
+  model_name:
+    description: Name of the model in UC.
+    default: uc_model_example
+  run_name:
+    description: Name of the model training run name logged in experiment
+    default: xgboost_models
+  experiment_name:
+    description: Name of the experiment path where results are logged too
+    default: /Users/alex.miller@databricks.com/alex_m_uc_example
+  roll_back:
+    description: If true it overrides model training pipeline and rolls production model back to specified version.
+    default: "False"
+  roll_back_version:
+    description: If roll_back = True then roll back to this model version.
+    default: "1"
+  config_file:
+    description: Config file name for model serving pipeline
+    default: "model_serving_config.json"
+  
+
+
+resources:
+  jobs:
+    github_uc_mlops_workflow:
+      name: ${bundle.target}-github-uc-mlops-workflow
+      job_clusters:
+        - job_cluster_key: uc_mlops_cluster
+          <<: *new_cluster
+      tasks:
+        - task_key: model-training
+          job_cluster_key: uc_mlops_cluster
+          notebook_task:
+            notebook_path: ../notebooks/mlflow-uc/model-training
+            base_parameters:
+              model_name: ${var.model_name}
+              run_name: ${var.run_name}
+              experiment_name: ${var.run_name}
+              git_source_info: url:${bundle.git.origin_url}; branch:${bundle.git.branch}; commit:${bundle.git.commit}
+            source: GIT
+        - task_key: validate-model
+          depends_on:
+            - task_key: model-training
+          notebook_task:
+            notebook_path: ../notebooks/mlflow-uc/validate-model
+            base_parameters:
+              model_name: ${var.model_name}
+              run_name: ${var.run_name}
+              experiment_name: ${var.run_name}
+              git_source_info: url:${bundle.git.origin_url}; branch:${bundle.git.branch}; commit:${bundle.git.commit}
+            source: GIT
+          job_cluster_key: uc_mlops_cluster
+        - task_key: update-model-alias
+          depends_on:
+            - task_key: validate-model
+          notebook_task:
+            notebook_path: ../notebooks/mlflow-uc/update-model-alias
+            base_parameters:
+              model_name: ${var.model_name}
+              run_name: ${var.run_name}
+              experiment_name: ${var.run_name}
+              git_source_info: url:${bundle.git.origin_url}; branch:${bundle.git.branch}; commit:${bundle.git.commit}
+            source: GIT
+          job_cluster_key: uc_mlops_cluster
+        - task_key: roll-back-model
+          depends_on:
+            - task_key: update-model-alias
+          notebook_task:
+            notebook_path: ../notebooks/mlflow-uc/roll-model-back
+            base_parameters:
+              roll_back: ${var.roll_back}
+              roll_back_version: ${var.roll_back_version}
+              model_name: ${var.model_name}
+              run_name: ${var.run_name}
+              experiment_name: ${var.run_name}
+              git_source_info: url:${bundle.git.origin_url}; branch:${bundle.git.branch}; commit:${bundle.git.commit}
+            source: GIT
+          job_cluster_key: uc_mlops_cluster
+        - task_key: deploy-model
+          depends_on:
+            - task_key: roll-back-model
+          notebook_task:
+            notebook_path: ../notebooks/mlflow-uc/deploy-model
+            base_parameters:
+              model_name: ${var.model_name}
+              run_name: ${var.run_name}
+              experiment_name: ${var.run_name}
+              config_file: ${var.config_file}
+              git_source_info: url:${bundle.git.origin_url}; branch:${bundle.git.branch}; commit:${bundle.git.commit}
+            source: GIT
+          job_cluster_key: uc_mlops_cluster
+      git_source:
+        git_url: https://github.com/alexmillerdb/uc-mlops-example.git
+        git_provider: gitHub
+        git_branch: main
+      # parameters:
+      #   - name: roll_back
+      #     default: "False"
+      #   - name: roll_back_version
+      #     default: "4"
+      #   - name: model_name
+      #     default: ${var.model_name}
+      #   - name: run_name
+      #     default: ${var.run_name}
+      #   - name: experiment_name 
+      #     default: ${var.experiment_name}
+

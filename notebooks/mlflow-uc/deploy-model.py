@@ -186,7 +186,7 @@ except RestException:
 import json
 
 # Step 1: Load the YAML file
-with open(f"./{config_file}", 'r') as cfg_file:
+with open(f"../configs/{config_file}", 'r') as cfg_file:
     serving_config = json.load(cfg_file)
 
 assert (type(serving_config) == dict), print("Config is not in dict format")

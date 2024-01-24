@@ -1,0 +1,53 @@
+{
+    "served_models": [
+        {
+            "name": "champion",
+            "model_name": "alex_m.uc_models.uc_model_example",
+            "model_version": "4",
+            "workload_size": "Small",
+            "scale_to_zero_enabled": true,
+            "workload_type": "CPU"
+        }
+    ],
+    "traffic_config": {
+        "routes": [
+            {
+                "served_model_name": "champion",
+                "traffic_percentage": 100,
+                "served_entity_name": "champion"
+            }
+        ]
+    },
+    "auto_capture_config": {
+        "catalog_name": "alex_m",
+        "schema_name": "uc_models",
+        "table_name_prefix": "uc_mlops_example",
+        "enabled": true
+    }
+}{
+    "served_models": [
+        {
+            "name": "champion",
+            "model_name": "alex_m.uc_models.uc_model_example",
+            "model_version": "4",
+            "workload_size": "Small",
+            "scale_to_zero_enabled": true,
+            "workload_type": "CPU"
+        }
+    ],
+    "traffic_config": {
+        "routes": [
+            {
+                "served_model_name": "champion",
+                "traffic_percentage": 100,
+                "served_entity_name": "champion"
+            }
+        ]
+    },
+    "auto_capture_config": {
+        "catalog_name": "alex_m",
+        "schema_name": "uc_models",
+        "table_name_prefix": "uc_mlops_example",
+        "enabled": true
+    }
+}
