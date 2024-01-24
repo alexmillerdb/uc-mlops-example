@@ -1,0 +1,24 @@
+{
+    "served_models": [
+        {
+            "name": "champion",
+            "model_name": "alex_m.uc_models.uc_model_example",
+            "model_version": "4",
+            "workload_size": "Small",
+            "scale_to_zero_enabled": true
+        },
+        {
+            "name": "challenger",
+            "model_name": "alex_m.uc_models.uc_model_example",
+            "model_version": "5",
+            "workload_size": "Small",
+            "scale_to_zero_enabled": true
+        }
+    ],
+    "traffic_config": {
+        "routes": [
+            {"served_model_name": "champion", "traffic_percentage": 80},
+            {"served_model_name": "challenger", "traffic_percentage": 20}
+        ]
+    }
+}
